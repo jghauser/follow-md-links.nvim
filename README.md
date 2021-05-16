@@ -4,7 +4,7 @@ This neovim plugin allows you to follow internal markdown links. It's written in
 
 This plugin requires neovim v0.5.
 
-# Installation
+## Installation
 
 Packer:
 
@@ -30,7 +30,7 @@ parser_config.markdown = {
 }
 ```
 
-# Configuration
+## Configuration
 
 You might also want to add the following keymap to easily go back to the previous file with backspace:
 
@@ -38,7 +38,7 @@ You might also want to add the following keymap to easily go back to the previou
 vim.api.nvim_set_keymap('', '<bs>', ':edit #<cr>', {noremap = true, silent = true})
 ```
 
-# TODO
+## TODO
 
 - Follow links other than local links and open webpages in browser of choice
 - Documentation
