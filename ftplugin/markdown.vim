@@ -3,4 +3,4 @@
 "
 
 " follow md links
-nnoremap <buffer><silent> <cr> :lua require('custom_plugins.mdfollow').follow_link()<CR>
+nnoremap <buffer><silent> <cr> :lua require('follow-md-links').follow_link()<CR>
