@@ -1,6 +1,6 @@
 # follow-md-links.nvim
 
-This neovim plugin allows you to follow internal markdown links. It's written in lua and uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links. This is alpha stage software and written by someone who's mostly just discovering how to write lua.
+This neovim plugin allows you to follow local markdown links. It's written in lua and uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links. This is alpha stage software and written by someone who's mostly just discovering how to write lua.
 
 This plugin requires neovim v0.5.
 
