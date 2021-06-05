@@ -8,7 +8,7 @@ This plugin requires neovim v0.5.
 
 Packer:
 
-```Lua
+```lua
 use {
   'jghauser/follow-md-links.nvim',
   config = function()
@@ -19,7 +19,7 @@ use {
 
 You also need the [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) plugin, and you need to enable the markdown parser (which can trigger crashes in certain situations). To install the markdown parser you need to add this to your nvim-treesitter setup:
 
-```Lua
+```lua
 local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
 parser_config.markdown = {
     install_info = {
@@ -34,7 +34,7 @@ parser_config.markdown = {
 
 You might also want to add the following keymap to easily go back to the previous file with backspace:
 
-```Lua
+```lua
 vim.api.nvim_set_keymap('', '<bs>', ':edit #<cr>', {noremap = true, silent = true})
 ```
 
