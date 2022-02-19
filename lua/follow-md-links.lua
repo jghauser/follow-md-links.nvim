@@ -31,12 +31,32 @@ local function get_link_destination()
 end
 
 local function resolve_link(link)
+  local link_type
   if link:sub(1,1) == [[/]] then
-    return link
+    link_type = 'local'
+    return link, link_type
   elseif link:sub(1,1) == [[~]] then
-    return os.getenv("HOME") .. [[/]] .. link:sub(2)
+    link_type = 'local'
+    return os.getenv("HOME") .. [[/]] .. link:sub(2), link_type
+  elseif link:sub(1,8) == [[https://]] or link:sub(1,7) == [[http://]] then
+    link_type = 'web'
+    return link, link_type
   else
-    return fn.expand('%:p:h') .. [[/]] .. link
+    link_type = 'local'
+    return fn.expand('%:p:h') .. [[/]] .. link, link_type
+  end
+end
+
+local function follow_local_link(link)
+  local fd = loop.fs_open(link, "r", 438)
+  if fd then
+    local stat = loop.fs_fstat(fd)
+    if not stat or not stat.type == 'file' or not loop.fs_access(link, 'R') then
+      loop.fs_close(fd)
+    else
+      loop.fs_close(fd)
+      cmd(string.format('%s %s', 'e', fn.fnameescape(link)))
+    end
   end
 end
 
@@ -44,16 +64,11 @@ function M.follow_link()
   local link_destination = get_link_destination()
 
   if link_destination then
-    local resolved_link = resolve_link(link_destination)
-    local fd = loop.fs_open(resolved_link, "r", 438)
-    if fd then
-      local stat = loop.fs_fstat(fd)
-      if not stat or not stat.type == 'file' or not loop.fs_access(resolved_link, 'R') then
-        loop.fs_close(fd)
-      else
-        loop.fs_close(fd)
-        cmd(string.format('%s %s', 'e', fn.fnameescape(resolved_link)))
-      end
+    local resolved_link, link_type = resolve_link(link_destination)
+    if link_type == 'local' then
+      follow_local_link(resolved_link)
+    elseif link_type == 'web' then
+      cmd('silent! !xdg-open ' .. resolved_link)
     end
   end
 end
