@@ -36,7 +36,6 @@ local function resolve_link(link)
   elseif link:sub(1,1) == [[~]] then
     return os.getenv("HOME") .. [[/]] .. link:sub(2)
   else
-    print (fn.expand('%:p:h'))
     return fn.expand('%:p:h') .. [[/]] .. link
   end
 end
