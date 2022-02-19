@@ -5,22 +5,22 @@
 local fn = vim.fn
 local cmd = vim.cmd
 local loop = vim.loop
-local ts_utils = require 'nvim-treesitter.ts_utils'
+local ts_utils = require('nvim-treesitter.ts_utils')
 
 local M = {}
 
-local function get_link()
+local function get_link_destination()
   local node_at_cursor = ts_utils.get_node_at_cursor()
   local parent_node = node_at_cursor:parent()
-  if not node_at_cursor or not parent_node then
+  if not (node_at_cursor and parent_node) then
     return
-  elseif parent_node:type() == 'link_destination' then
+  elseif node_at_cursor:type() == 'link_destination' then
     return ts_utils.get_node_text(node_at_cursor, 0)[1]
-  elseif parent_node:type() == 'link_text' then
-    return ts_utils.get_node_text(ts_utils.get_next_node(parent_node), 0)[1]
-  elseif node_at_cursor:type() == 'link' then
+  elseif node_at_cursor:type() == 'link_text' then
+    return ts_utils.get_node_text(ts_utils.get_next_node(node_at_cursor), 0)[1]
+  elseif node_at_cursor:type() == 'inline_link' then
     local child_nodes = ts_utils.get_named_children(node_at_cursor)
-    for k, v in pairs(child_nodes) do
+    for _, v in pairs(child_nodes) do
 	    if v:type() == 'link_destination' then
         return ts_utils.get_node_text(v)[1]
       end
@@ -31,26 +31,29 @@ local function get_link()
 end
 
 local function resolve_link(link)
-  if string.sub(link,1,1) == [[/]] then
+  if link:sub(1,1) == [[/]] then
     return link
+  elseif link:sub(1,1) == [[~]] then
+    return os.getenv("HOME") .. [[/]] .. link:sub(2)
   else
+    print (fn.expand('%:p:h'))
     return fn.expand('%:p:h') .. [[/]] .. link
   end
 end
 
 function M.follow_link()
-  local link = get_link()
+  local link_destination = get_link_destination()
 
-  if link then
-    link = resolve_link(link)
-    local fd = loop.fs_open(link, "r", 438)
+  if link_destination then
+    local resolved_link = resolve_link(link_destination)
+    local fd = loop.fs_open(resolved_link, "r", 438)
     if fd then
       local stat = loop.fs_fstat(fd)
-      if not stat or not stat.type == 'file' or not loop.fs_access(link, 'R') then
+      if not stat or not stat.type == 'file' or not loop.fs_access(resolved_link, 'R') then
         loop.fs_close(fd)
       else
         loop.fs_close(fd)
-        cmd(string.format('%s %s', 'e', fn.fnameescape(link)))
+        cmd(string.format('%s %s', 'e', fn.fnameescape(resolved_link)))
       end
     end
   end
