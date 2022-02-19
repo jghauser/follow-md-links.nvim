@@ -32,3 +32,4 @@ vim.api.nvim_set_keymap('', '<bs>', ':edit #<cr>', {noremap = true, silent = tru
 - Follow links other than local links and open webpages in browser of choice
 - Documentation
 - Code legibility and comments
+- Support filenames and paths with blanks
