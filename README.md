@@ -1,8 +1,15 @@
 # follow-md-links.nvim
 
-This neovim plugin allows you to follow local markdown links by pressing enter when the cursor is positioned on a link. It supports absolute and relative paths and paths beginning with `~`. The plugin also opens web links with the default browser (using `xdg-open`). Such links need to start with `https://` or `http://` to be identified properly.
+This neovim plugin allows you to follow markdown links by pressing enter when the cursor is positioned on a link. It supports:
 
-It uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links. This is beta stage software and written by someone who's mostly just discovering how to write lua. The plugin has only been tested under Linux.
+- absolute file paths (e.g. `[a file](/home/user/file.md)`)
+- relative file paths (e.g. `[a file](../somefile.txt)`)
+- file paths beginning with `~` (e.g. `[a file](~/folder/a_file)`).
+- web links (e.g. `[wikipedia](https://wikipedia.org)`)
+
+Local files are opened in neovim and web links are opened with the default browser (using `xdg-open`). Web links need to start with `https://` or `http://` to be identified properly.
+
+The plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links. This is beta stage software and written by someone who's mostly just discovering how to write lua. The plugin has only been tested under Linux.
 
 This plugin requires neovim v0.5.
 
