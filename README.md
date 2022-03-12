@@ -19,25 +19,16 @@ Packer:
 
 ```lua
 use {
-  'jghauser/follow-md-links.nvim',
-  config = function()
-    require('follow-md-links')
-  end
+  'jghauser/follow-md-links.nvim'
 }
 ```
 
-You also need the [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) plugin, and you need to make sure you have the treesitter markdown parser installed. If your nvim-treesitter config enables all maintained parsers, the markdown parser should be installed by default. You can check by looking at the markdown entry in `:checkhealth nvim-treesitter` (there should be a tick in the "H" column).
+You also need the [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) plugin, and you need to make sure you have the treesitter markdown parser installed. If your nvim-treesitter config enables all maintained parsers, the markdown parser should be installed by default. You can check by looking at the markdown entry in `:checkhealth nvim-treesitter` (there should be a tick in the "H" column). If the markdown parser is missing, install it with `TSInstall markdown`.
 
 ## Configuration
 
-By default the plugin maps `<cr>` in normal mode to open links in markdown files. You might also want to add the following keymap to easily go back to the previous file with backspace:
+The plugin maps `<cr>` in normal mode to open links in markdown files. You might also want to add the following keymap to easily go back to the previous file with backspace:
 
 ```lua
 vim.api.nvim_set_keymap('', '<bs>', ':edit #<cr>', {noremap = true, silent = true})
 ```
-
-## TODO
-
-- Documentation
-- Code legibility and comments
-- Support filenames and paths with blanks?
