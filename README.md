@@ -9,7 +9,7 @@ This neovim plugin allows you to follow markdown links by pressing enter when th
 
 Local files are opened in neovim and web links are opened with the default browser (using `xdg-open`). Web links need to start with `https://` or `http://` to be identified properly.
 
-The plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links. This is beta stage software and written by someone who's mostly just discovering how to write lua. The plugin has only been tested under Linux.
+The plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links. This is beta stage software and written by someone who's mostly just discovering how to write lua.
 
 This plugin requires neovim v0.5.
 

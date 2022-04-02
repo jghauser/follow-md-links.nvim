@@ -9,6 +9,11 @@ local ts_utils = require('nvim-treesitter.ts_utils')
 
 local M = {}
 
+local os_name = loop.os_uname().sysname
+local is_windows = os_name == 'Windows'
+local is_macos = os_name == 'Darwin'
+local is_linux = os_name == 'Linux'
+
 local function get_link_destination()
   local node_at_cursor = ts_utils.get_node_at_cursor()
   local parent_node = node_at_cursor:parent()
@@ -68,7 +73,13 @@ function M.follow_link()
     if link_type == 'local' then
       follow_local_link(resolved_link)
     elseif link_type == 'web' then
-      cmd('silent! !xdg-open ' .. resolved_link)
+      if is_linux then
+        vim.fn.system('xdg-open ' .. vim.fn.shellescape(resolved_link))
+      elseif is_macos then
+        vim.fn.system('open ' .. vim.fn.shellescape(resolved_link))
+      elseif is_windows then
+        vim.fn.system('cmd.exe /c start "" ' .. vim.fn.shellescape(resolved_link))
+      end
     end
   end
 end
