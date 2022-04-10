@@ -7,7 +7,7 @@ This neovim plugin allows you to follow markdown links by pressing enter when th
 - file paths beginning with `~` (e.g. `[a file](~/folder/a_file)`).
 - web links (e.g. `[wikipedia](https://wikipedia.org)`)
 
-Local files are opened in neovim and web links are opened with the default browser (using `xdg-open`). Web links need to start with `https://` or `http://` to be identified properly.
+Local files are opened in neovim and web links are opened with the default browser. Web links need to start with `https://` or `http://` to be identified properly.
 
 The plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links. This is beta stage software and written by someone who's mostly just discovering how to write lua.
 
