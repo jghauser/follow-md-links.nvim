@@ -23,7 +23,7 @@ use {
 }
 ```
 
-You also need the [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) plugin, and you need to make sure you have the treesitter markdown parser installed. If your nvim-treesitter config enables all maintained parsers, the markdown parser should be installed by default. You can check by looking at the markdown entry in `:checkhealth nvim-treesitter` (there should be a tick in the "H" column). If the markdown parser is missing, install it with `TSInstall markdown`.
+You also need the [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) plugin, and you need to make sure you have the treesitter markdown parser installed. You can whether that is the case by looking at the markdown entry in `:checkhealth nvim-treesitter` (there should be a tick in the "H" column). If the markdown parser is missing, install it with `TSInstall markdown` or by adding it to `ensure_installed` in your nvim-treesitter setup function.
 
 ## Configuration
 
