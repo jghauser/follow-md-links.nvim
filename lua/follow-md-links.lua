@@ -6,6 +6,7 @@ local fn = vim.fn
 local cmd = vim.cmd
 local loop = vim.loop
 local ts_utils = require('nvim-treesitter.ts_utils')
+local query = require('vim.treesitter.query')
 
 local M = {}
 
@@ -20,14 +21,14 @@ local function get_link_destination()
   if not (node_at_cursor and parent_node) then
     return
   elseif node_at_cursor:type() == 'link_destination' then
-    return ts_utils.get_node_text(node_at_cursor, 0)[1]
+    return vim.split(query.get_node_text(node_at_cursor, 0), '\n')[1]
   elseif node_at_cursor:type() == 'link_text' then
-    return ts_utils.get_node_text(ts_utils.get_next_node(node_at_cursor), 0)[1]
+    return vim.split(query.get_node_text(ts_utils.get_next_node(node_at_cursor), 0), '\n')[1]
   elseif node_at_cursor:type() == 'inline_link' then
     local child_nodes = ts_utils.get_named_children(node_at_cursor)
     for _, v in pairs(child_nodes) do
 	    if v:type() == 'link_destination' then
-        return ts_utils.get_node_text(v)[1]
+        return vim.split(query.get_node_text(v, 0), '\n')[1]
       end
     end
   else
