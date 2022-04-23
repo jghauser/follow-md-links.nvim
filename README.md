@@ -11,7 +11,7 @@ Local files are opened in neovim and web links are opened with the default brows
 
 The plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links. This is beta stage software and written by someone who's mostly just discovering how to write lua.
 
-This plugin requires neovim v0.5.
+This plugin is tested against the latest stable version of neovim. It might work with other versions, but this is not guaranteed.
 
 ## Installation
 
