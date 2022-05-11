@@ -7,6 +7,7 @@ local cmd = vim.cmd
 local loop = vim.loop
 local ts_utils = require('nvim-treesitter.ts_utils')
 local query = require('vim.treesitter.query')
+local api = vim.api
 
 local M = {}
 
@@ -14,6 +15,23 @@ local os_name = loop.os_uname().sysname
 local is_windows = os_name == 'Windows'
 local is_macos = os_name == 'Darwin'
 local is_linux = os_name == 'Linux'
+
+local function get_reference_link_destination(link_label)
+  local language_tree = vim.treesitter.get_parser(0)
+  local syntax_tree = language_tree:parse()
+  local root = syntax_tree[1]:root()
+  local parse_query = vim.treesitter.parse_query('markdown', [[
+  (link_reference_definition
+    (link_label) @label (#eq? @label "]] .. link_label .. [[")
+    (link_destination) @link_destination)
+  ]])
+  local prev_line = api.nvim_win_get_cursor(0)[1] - 1
+  local last_line = root:end_()
+  for _, captures, _ in parse_query:iter_matches(root, 0, prev_line, last_line) do
+    return query.get_node_text(captures[2], 0)
+    -- return query.get_node_text(captures[2], 0)
+  end
+end
 
 local function get_link_destination()
   local node_at_cursor = ts_utils.get_node_at_cursor()
@@ -23,14 +41,31 @@ local function get_link_destination()
   elseif node_at_cursor:type() == 'link_destination' then
     return vim.split(query.get_node_text(node_at_cursor, 0), '\n')[1]
   elseif node_at_cursor:type() == 'link_text' then
-    return vim.split(query.get_node_text(ts_utils.get_next_node(node_at_cursor), 0), '\n')[1]
-  elseif node_at_cursor:type() == 'inline_link' then
+    local next_node = ts_utils.get_next_node(node_at_cursor)
+    if next_node:type() == 'link_destination' then
+      return vim.split(query.get_node_text(next_node, 0), '\n')[1]
+    elseif next_node:type() == 'link_label' then
+      local link_label = vim.split(query.get_node_text(next_node, 0), '\n')[1]
+      return get_reference_link_destination(link_label)
+    end
+  elseif node_at_cursor:type() == 'link_reference_definition' or node_at_cursor:type() == 'inline_link' then
     local child_nodes = ts_utils.get_named_children(node_at_cursor)
-    for _, v in pairs(child_nodes) do
-	    if v:type() == 'link_destination' then
-        return vim.split(query.get_node_text(v, 0), '\n')[1]
+    for _, node in pairs(child_nodes) do
+	    if node:type() == 'link_destination' then
+        return vim.split(query.get_node_text(node, 0), '\n')[1]
       end
     end
+  elseif node_at_cursor:type() == 'full_reference_link' then
+    local child_nodes = ts_utils.get_named_children(node_at_cursor)
+    for _, node in pairs(child_nodes) do
+	    if node:type() == 'link_label' then
+        local link_label = vim.split(query.get_node_text(node, 0), '\n')[1]
+        return get_reference_link_destination(link_label)
+      end
+    end
+  elseif node_at_cursor:type() == 'link_label' then
+    local link_label = vim.split(query.get_node_text(node_at_cursor, 0), '\n')[1]
+    return get_reference_link_destination(link_label)
   else
     return
   end
