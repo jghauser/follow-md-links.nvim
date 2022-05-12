@@ -29,7 +29,6 @@ local function get_reference_link_destination(link_label)
   local last_line = root:end_()
   for _, captures, _ in parse_query:iter_matches(root, 0, prev_line, last_line) do
     return query.get_node_text(captures[2], 0)
-    -- return query.get_node_text(captures[2], 0)
   end
 end
 
