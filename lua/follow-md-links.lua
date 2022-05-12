@@ -25,9 +25,7 @@ local function get_reference_link_destination(link_label)
     (link_label) @label (#eq? @label "]] .. link_label .. [[")
     (link_destination) @link_destination)
   ]])
-  local prev_line = api.nvim_win_get_cursor(0)[1] - 1
-  local last_line = root:end_()
-  for _, captures, _ in parse_query:iter_matches(root, 0, prev_line, last_line) do
+  for _, captures, _ in parse_query:iter_matches(root, 0) do
     return query.get_node_text(captures[2], 0)
   end
 end
