@@ -10,8 +10,6 @@ This neovim plugin allows you to follow markdown links by pressing enter when th
 
 Local files are opened in neovim and web links are opened with the default browser. Web links need to start with `https://` or `http://` to be identified properly.
 
-The plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links. This is beta stage software and written by someone who's mostly just discovering how to write lua.
-
 This plugin is tested against the latest stable version of neovim. It might work with other versions, but this is not guaranteed.
 
 ## Installation
@@ -24,7 +22,7 @@ use {
 }
 ```
 
-You also need the [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) plugin, and you need to make sure you have the treesitter markdown parser installed. You can whether that is the case by looking at the markdown entry in `:checkhealth nvim-treesitter` (there should be a tick in the "H" column). If the markdown parser is missing, install it with `TSInstall markdown` or by adding it to `ensure_installed` in your nvim-treesitter setup function.
+As this plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links, you will need that plugin, and you will need to make sure you have the treesitter markdown parser installed. You can check whether that is the case by looking at the markdown entry in `:checkhealth nvim-treesitter` (there should be a tick in the "H" column). If the markdown parser is missing, install it with `TSInstall markdown` or by adding it to `ensure_installed` in your nvim-treesitter setup function.
 
 ## Configuration
 
