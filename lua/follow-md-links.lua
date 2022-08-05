@@ -48,14 +48,14 @@ local function get_link_destination()
   elseif node_at_cursor:type() == 'link_reference_definition' or node_at_cursor:type() == 'inline_link' then
     local child_nodes = ts_utils.get_named_children(node_at_cursor)
     for _, node in pairs(child_nodes) do
-	    if node:type() == 'link_destination' then
+      if node:type() == 'link_destination' then
         return vim.split(query.get_node_text(node, 0), '\n')[1]
       end
     end
   elseif node_at_cursor:type() == 'full_reference_link' then
     local child_nodes = ts_utils.get_named_children(node_at_cursor)
     for _, node in pairs(child_nodes) do
-	    if node:type() == 'link_label' then
+      if node:type() == 'link_label' then
         local link_label = vim.split(query.get_node_text(node, 0), '\n')[1]
         return get_reference_link_destination(link_label)
       end
@@ -70,13 +70,13 @@ end
 
 local function resolve_link(link)
   local link_type
-  if link:sub(1,1) == [[/]] then
+  if link:sub(1, 1) == [[/]] then
     link_type = 'local'
     return link, link_type
-  elseif link:sub(1,1) == [[~]] then
+  elseif link:sub(1, 1) == [[~]] then
     link_type = 'local'
     return os.getenv("HOME") .. [[/]] .. link:sub(2), link_type
-  elseif link:sub(1,8) == [[https://]] or link:sub(1,7) == [[http://]] then
+  elseif link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
     link_type = 'web'
     return link, link_type
   else
@@ -86,7 +86,18 @@ local function resolve_link(link)
 end
 
 local function follow_local_link(link)
+  local link = link
   local fd = loop.fs_open(link, "r", 438)
+  if not fd
+  then
+    -- attempt to add an extension and open
+    fd = loop.fs_open(link .. ".md", "r", 438)
+    if fd
+    then 
+      link = link .. ".md"
+    end
+  end
+
   if fd then
     local stat = loop.fs_fstat(fd)
     if not stat or not stat.type == 'file' or not loop.fs_access(link, 'R') then
