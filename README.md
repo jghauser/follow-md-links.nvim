@@ -22,7 +22,7 @@ use {
 }
 ```
 
-As this plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links, you will need that plugin, and you will need to make sure you have the treesitter markdown parser installed. You can check whether that is the case by looking at the markdown entry in `:checkhealth nvim-treesitter` (there should be a tick in the "H" column). If the markdown parser is missing, install it with `TSInstall markdown` or by adding it to `ensure_installed` in your nvim-treesitter setup function.
+As this plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links, you will need that plugin, and you will need to make sure you have the treesitter markdown and markdown_inline parsers installed. You can check whether that is the case by looking at the entries in `:checkhealth nvim-treesitter` (there should be a tick in the "H" column). If the markdown parsers are missing, install it with `TSInstall markdown markdown_inline` or by adding them to `ensure_installed` in your nvim-treesitter setup function.
 
 ## Configuration
 
