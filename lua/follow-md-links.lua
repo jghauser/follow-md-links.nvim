@@ -7,7 +7,6 @@ local cmd = vim.cmd
 local loop = vim.loop
 local ts_utils = require("nvim-treesitter.ts_utils")
 local query = require("vim.treesitter.query")
-local api = vim.api
 
 local M = {}
 
