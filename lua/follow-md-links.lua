@@ -71,7 +71,7 @@ local function resolve_link(link)
 	local link_type
 	if link:sub(1, 1) == [[/]] then
 		link_type = "local"
-		return link, link_type
+		return link:gsub("%%20", " "), link_type
 	elseif link:sub(1, 1) == [[~]] then
 		link_type = "local"
 		return os.getenv("HOME") .. [[/]] .. link:sub(2), link_type
@@ -80,7 +80,7 @@ local function resolve_link(link)
 		return link, link_type
 	else
 		link_type = "local"
-		return fn.expand("%:p:h") .. [[/]] .. link, link_type
+		return fn.expand("%:p:h") .. [[/]] .. link:gsub("%%20", " "), link_type
 	end
 end
 
