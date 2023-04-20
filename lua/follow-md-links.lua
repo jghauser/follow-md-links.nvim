@@ -7,6 +7,7 @@ local cmd = vim.cmd
 local loop = vim.loop
 local ts_utils = require("nvim-treesitter.ts_utils")
 local query = require("vim.treesitter.query")
+local treesitter = require("vim.treesitter")
 
 local M = {}
 
@@ -25,7 +26,7 @@ local function get_reference_link_destination(link_label)
     (link_destination) @link_destination)
   ]])
 	for _, captures, _ in parse_query:iter_matches(root, 0) do
-		return query.get_node_text(captures[2], 0)
+		return treesitter.get_node_text(captures[2], 0)
 	end
 end
 
@@ -35,32 +36,32 @@ local function get_link_destination()
 	if not (node_at_cursor and parent_node) then
 		return
 	elseif node_at_cursor:type() == "link_destination" then
-		return vim.split(query.get_node_text(node_at_cursor, 0), "\n")[1]
+		return vim.split(treesitter.get_node_text(node_at_cursor, 0), "\n")[1]
 	elseif node_at_cursor:type() == "link_text" then
 		local next_node = ts_utils.get_next_node(node_at_cursor)
 		if next_node:type() == "link_destination" then
-			return vim.split(query.get_node_text(next_node, 0), "\n")[1]
+			return vim.split(treesitter.get_node_text(next_node, 0), "\n")[1]
 		elseif next_node:type() == "link_label" then
-			local link_label = vim.split(query.get_node_text(next_node, 0), "\n")[1]
+			local link_label = vim.split(treesitter.get_node_text(next_node, 0), "\n")[1]
 			return get_reference_link_destination(link_label)
 		end
 	elseif node_at_cursor:type() == "link_reference_definition" or node_at_cursor:type() == "inline_link" then
 		local child_nodes = ts_utils.get_named_children(node_at_cursor)
 		for _, node in pairs(child_nodes) do
 			if node:type() == "link_destination" then
-				return vim.split(query.get_node_text(node, 0), "\n")[1]
+				return vim.split(treesitter.get_node_text(node, 0), "\n")[1]
 			end
 		end
 	elseif node_at_cursor:type() == "full_reference_link" then
 		local child_nodes = ts_utils.get_named_children(node_at_cursor)
 		for _, node in pairs(child_nodes) do
 			if node:type() == "link_label" then
-				local link_label = vim.split(query.get_node_text(node, 0), "\n")[1]
+				local link_label = vim.split(treesitter.get_node_text(node, 0), "\n")[1]
 				return get_reference_link_destination(link_label)
 			end
 		end
 	elseif node_at_cursor:type() == "link_label" then
-		local link_label = vim.split(query.get_node_text(node_at_cursor, 0), "\n")[1]
+		local link_label = vim.split(treesitter.get_node_text(node_at_cursor, 0), "\n")[1]
 		return get_reference_link_destination(link_label)
 	else
 		return
