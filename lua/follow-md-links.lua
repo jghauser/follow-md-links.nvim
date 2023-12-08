@@ -20,7 +20,7 @@ local function get_reference_link_destination(link_label)
 	local language_tree = vim.treesitter.get_parser(0)
 	local syntax_tree = language_tree:parse()
 	local root = syntax_tree[1]:root()
-	local parse_query = vim.treesitter.query.parse("markdown", [[
+	local parse_query = vim.treesitter.parse_query("markdown", [[
   (link_reference_definition
     (link_label) @label (#eq? @label "]] .. link_label .. [[")
     (link_destination) @link_destination)
