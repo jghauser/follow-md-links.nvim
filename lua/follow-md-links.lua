@@ -25,8 +25,13 @@ local function get_reference_link_destination(link_label)
     (link_label) @label (#eq? @label "]] .. link_label .. [[")
     (link_destination) @link_destination)
   ]])
+	-- Problem with handling whitespace in filenames elegently is with this iter_matches
 	for _, captures, _ in parse_query:iter_matches(root, 0) do
-		return treesitter.get_node_text(captures[2], 0)
+		local node_text = treesitter.get_node_text(captures[2], 0)
+		-- Kludgy method right now is to require that filenames with spaces are wrapped in <>,
+		-- which are stripped out after the matching is complete
+		return string.gsub(node_text, "[<>]", "")
+		--return treesitter.get_node_text(captures[2], 0)
 	end
 end
 
