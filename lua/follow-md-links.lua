@@ -112,7 +112,20 @@ local function follow_local_link(link)
 	end
 end
 
+local function can_follow_link()
+	-- we can follow link if the current buffer is of type markdown
+	-- otherwise we cannot
+	if vim.bo.filetype == "markdown" then
+		return true
+	end
+	return false
+end
+
 function M.follow_link()
+	if not can_follow_link() then
+		return
+	end
+
 	local link_destination = get_link_destination()
 
 	if link_destination then
