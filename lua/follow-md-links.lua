@@ -91,23 +91,30 @@ local function resolve_link(link)
 end
 
 local function follow_local_link(link)
-	local link = link
-	local fd = loop.fs_open(link, "r", 438)
-	if not fd then
+	local modified_link = nil
+	local line_number = nil
+	if vim.fn.filereadable(link) == 0 then
 		-- attempt to add an extension and open
-		fd = loop.fs_open(link .. ".md", "r", 438)
-		if fd then
-			link = link .. ".md"
+		if vim.fn.filereadable(link .. ".md") == 1 then
+			modified_link = modified_link .. ".md"
+		else
+			-- attempt to parse line number
+			local path_and_line_number = vim.split(link, ":")
+			local path = path_and_line_number[1]
+			line_number = path_and_line_number[2]
+			if vim.fn.filereadable(path) == 1 then
+				modified_link = path
+			end
 		end
+	else
+		modified_link = link
 	end
 
-	if fd then
-		local stat = loop.fs_fstat(fd)
-		if not stat or not stat.type == "file" or not loop.fs_access(link, "R") then
-			loop.fs_close(fd)
+	if modified_link then
+		if line_number then
+			cmd(string.format("%s +%s %s", "e", line_number, fn.fnameescape(modified_link)))
 		else
-			loop.fs_close(fd)
-			cmd(string.format("%s %s", "e", fn.fnameescape(link)))
+			cmd(string.format("%s %s", "e", fn.fnameescape(modified_link)))
 		end
 	end
 end
