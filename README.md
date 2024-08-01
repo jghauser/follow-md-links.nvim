@@ -5,6 +5,7 @@ This neovim plugin allows you to follow markdown links by pressing enter when th
 - absolute file paths (e.g. `[a file](/home/user/file.md)`)
 - relative file paths (e.g. `[a file](../somefile.txt)`)
 - file paths beginning with `~` (e.g. `[a file](~/folder/a_file)`).
+- file paths with a line number (e.g. `[a file](/home/user/file.md:42)`), this will also place the cursor on the specified line similar to `gF` (see :h gF)
 - reference links (e.g. `[a file][label]. [label]: ~/folder/a_file`)
 - web links (e.g. `[wikipedia](https://wikipedia.org)`)
 
