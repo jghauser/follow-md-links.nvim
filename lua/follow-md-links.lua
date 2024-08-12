@@ -92,22 +92,17 @@ end
 
 local function follow_local_link(link)
 	local modified_link = nil
-	local line_number = nil
-	if vim.fn.filereadable(link) == 0 then
-		-- attempt to add an extension and open
-		if vim.fn.filereadable(link .. ".md") == 1 then
-			modified_link = modified_link .. ".md"
-		else
-			-- attempt to parse line number
-			local path_and_line_number = vim.split(link, ":")
-			local path = path_and_line_number[1]
-			line_number = path_and_line_number[2]
-			if vim.fn.filereadable(path) == 1 then
-				modified_link = path
-			end
-		end
+	local path_and_line_number = vim.split(link, ":")
+	local path = path_and_line_number[1]
+
+	-- attempt to parse line number, will be nil if index 2 does not exist
+	local line_number = path_and_line_number[2]
+
+	-- attempt to add an extension and open
+	if vim.fn.filereadable(path .. ".md") == 1 then
+		modified_link = path .. ".md"
 	else
-		modified_link = link
+		modified_link = path
 	end
 
 	if modified_link then
