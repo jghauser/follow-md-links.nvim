@@ -98,6 +98,14 @@ local function follow_local_link(link)
 	-- attempt to parse line number, will be nil if index 2 does not exist
 	local line_number = path_and_line_number[2]
 
+	-- check if it is a directory, and create if true
+	if path:sub(-1) == "/" then
+		path = path:sub(1,-2)
+		if vim.fn.glob(path) == "" then
+			cmd(string.format("%s %s %s", "!mkdir", "-p", fn.fnameescape(path)))
+		end
+	end
+
 	-- attempt to add an extension and open
 	if vim.fn.filereadable(path .. ".md") == 1 then
 		modified_link = path .. ".md"
