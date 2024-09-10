@@ -78,6 +78,9 @@ local function resolve_link(link)
 	if link:sub(1, 1) == [[/]] then
 		link_type = "local"
 		return link, link_type
+	elseif link:sub(1, 1) == [[#]] then
+		link_type = "heading"
+		return link:sub(2), link_type
 	elseif link:sub(1, 1) == [[~]] then
 		link_type = "local"
 		return os.getenv("HOME") .. [[/]] .. link:sub(2), link_type
@@ -114,6 +117,12 @@ local function follow_local_link(link)
 	end
 end
 
+local function follow_heading_link(link)
+	link = link:gsub("-", "[- ]*")
+	link = link:gsub("_", "[_ ]*")
+	vim.fn.search("\\c^#\\+ *" .. link, 'ew')
+end
+
 function M.follow_link()
 	local link_destination = get_link_destination()
 
@@ -121,6 +130,8 @@ function M.follow_link()
 		local resolved_link, link_type = resolve_link(link_destination)
 		if link_type == "local" then
 			follow_local_link(resolved_link)
+		elseif link_type == "heading" then
+			follow_heading_link(resolved_link)
 		elseif link_type == "web" then
 			if is_linux then
 				vim.fn.system("xdg-open " .. vim.fn.shellescape(resolved_link))
