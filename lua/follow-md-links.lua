@@ -101,7 +101,7 @@ local function follow_local_link(link)
 	local line_number = path_and_line_number[2]
 
 	-- attempt to add an extension and open
-	if vim.fn.filereadable(path .. ".md") == 1 then
+	if path:sub(-3) ~= ".md" and vim.fn.glob(path) == "" then
 		modified_link = path .. ".md"
 	else
 		modified_link = path
