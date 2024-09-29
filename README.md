@@ -8,6 +8,7 @@ This neovim plugin allows you to follow markdown links by pressing enter when th
 - file paths with a line number (e.g. `[a file](/home/user/file.md:42)`), this will also place the cursor on the specified line similar to `gF` (see :h gF)
 - reference links (e.g. `[a file][label]. [label]: ~/folder/a_file`)
 - web links (e.g. `[wikipedia](https://wikipedia.org)`)
+- heading links (e.g. `[chapter 1](#-chapter-1)`
 
 Local files are opened in neovim and web links are opened with the default browser. Web links need to start with `https://` or `http://` to be identified properly.
 
