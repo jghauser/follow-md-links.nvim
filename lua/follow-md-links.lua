@@ -9,10 +9,12 @@ local ts_utils = require("nvim-treesitter.ts_utils")
 local query = require("vim.treesitter.query")
 local treesitter = require("vim.treesitter")
 
-local M = {}
+function string:startswith(start)
+    return self:sub(1, #start) == start
+end
 
 local os_name = loop.os_uname().sysname
-local is_windows = os_name == "Windows"
+local is_windows = os_name:startswith("Windows")
 local is_macos = os_name == "Darwin"
 local is_linux = os_name == "Linux"
 
@@ -113,6 +115,8 @@ local function follow_local_link(link)
 		end
 	end
 end
+
+local M = {}
 
 function M.follow_link()
 	local link_destination = get_link_destination()
