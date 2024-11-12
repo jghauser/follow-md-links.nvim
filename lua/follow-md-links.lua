@@ -22,13 +22,13 @@ local function get_reference_link_destination(link_label)
 	local language_tree = vim.treesitter.get_parser(0)
 	local syntax_tree = language_tree:parse()
 	local root = syntax_tree[1]:root()
-	local parse_query = vim.treesitter.parse_query("markdown", [[
+	local parsed_query = vim.treesitter.query.parse("markdown", [[
   (link_reference_definition
     (link_label) @label (#eq? @label "]] .. link_label .. [[")
     (link_destination) @link_destination)
   ]])
 	-- Problem with handling whitespace in filenames elegently is with this iter_matches
-	for _, captures, _ in parse_query:iter_matches(root, 0) do
+	for _, captures, _ in parsed_query:iter_matches(root, 0) do
 		local node_text = treesitter.get_node_text(captures[2], 0)
 		-- Kludgy method right now is to require that filenames with spaces are wrapped in <>,
 		-- which are stripped out after the matching is complete
@@ -44,7 +44,14 @@ local function get_link_destination()
 		return
 	elseif node_at_cursor:type() == "link_destination" then
 		return vim.split(treesitter.get_node_text(node_at_cursor, 0), "\n")[1]
+	elseif node_at_cursor:type() == "shortcut_link" then
+		local link_text = vim.split(treesitter.get_node_text(node_at_cursor, 0), "\n")[1]
+		return get_reference_link_destination(link_text)
 	elseif node_at_cursor:type() == "link_text" then
+		if node_at_cursor:parent():type() == "shortcut_link" then
+			local link_text = vim.split(treesitter.get_node_text(node_at_cursor:parent(), 0), "\n")[1]
+			return get_reference_link_destination(link_text)
+		end
 		local next_node = ts_utils.get_next_node(node_at_cursor)
 		if next_node:type() == "link_destination" then
 			return vim.split(treesitter.get_node_text(next_node, 0), "\n")[1]
