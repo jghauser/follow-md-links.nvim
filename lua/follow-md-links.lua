@@ -96,6 +96,9 @@ local function resolve_link(link)
 	elseif link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
 		link_type = "web"
 		return link, link_type
+	elseif link:sub(1, 6) == [[man://]] then
+		link_type = "man"
+		return link, link_type
 	else
 		link_type = "local"
 		return fn.expand("%:p:h") .. [[/]] .. link, link_type
@@ -151,6 +154,8 @@ function M.follow_link()
 			follow_local_link(resolved_link)
 		elseif link_type == "heading" then
 			follow_heading_link(resolved_link)
+		elseif link_type == "man" then
+			vim.cmd.Man(link_destination:gsub("man://", ""))
 		elseif link_type == "web" then
 			if is_linux then
 				vim.fn.system("xdg-open " .. vim.fn.shellescape(resolved_link))
