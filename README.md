@@ -9,7 +9,8 @@ This neovim plugin allows you to follow markdown links by pressing enter when th
 - reference links (e.g. `[a file][label]. [label]: ~/folder/a_file`)
 - text-only reference links (e.g. `[example website]. [example website]: https://example.org`)
 - web links (e.g. `[wikipedia](https://wikipedia.org)`)
-- heading links (e.g. `[chapter 1](#-chapter-1)`
+- heading links (e.g. `[chapter 1](#-chapter-1)`)
+- file path with heading link (e.g. `[file.md #chapter 1](file.md#-chapter-1)`)
 
 Local files are opened in neovim and web links are opened with the default browser. Web links need to start with `https://` or `http://` to be identified properly.
 
@@ -93,8 +94,8 @@ end,
 
 ##### Sample code 2 - heading_link
 
-Replace 'and' -> 'and' or '&'
-Replace 'at'  -> 'at'  or '@'
+- Treat 'and' as 'and' or '&'
+- Treat 'at'  as 'at'  or '@'
 
 ```lua
 heading_link = function(link)
@@ -108,7 +109,7 @@ end,
 
 ```
 
-### keys
+### keymaps
 
 ```lua
 keys = {
