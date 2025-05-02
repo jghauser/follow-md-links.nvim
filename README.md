@@ -15,6 +15,7 @@ Local files are opened in neovim and web links are opened with the default brows
 
 This plugin is tested against the latest stable version of neovim. It might work with other versions, but this is not guaranteed.
 
+
 ## Installation
 
 Packer:
@@ -25,12 +26,109 @@ use {
 }
 ```
 
+lazy.nvim:
+```lua
+return {
+   'jghauser/follow-md-links.nvim',
+   dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+   },
+   ft = { 'markdown' },
+   opts = true,
+   cmd = { 'FollowMdLinks' },
+   keys = {},
+}
+```
+or
+
+```lua
+return {
+   'jghauser/follow-md-links.nvim',
+   dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+   },
+   config = function()
+      require('follow-md-links').setup(),
+   end,
+   ft = { 'markdown' },
+   cmd = { 'FollowMdLinks' },
+   keys = {},
+}
+```
+
 As this plugin uses [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to identify links, you will need that plugin, and you will need to make sure you have the treesitter markdown and markdown_inline parsers installed. You can check whether that is the case by looking at the entries in `:checkhealth nvim-treesitter` (there should be a tick in the "H" column). If the markdown parsers are missing, install it with `TSInstall markdown markdown_inline` or by adding them to `ensure_installed` in your nvim-treesitter setup function.
+
 
 ## Configuration
 
-The plugin maps `<cr>` in normal mode to open links in markdown files. You might also want to add the following keymap to easily go back to the previous file with backspace:
+### Default options
+```lua
+opts = {
+   ft = { 'markdown' }, -- limit command to specific filetypes
+   formatter = {
+      heading_link = function(link)
+         link = link:gsub("-", "[- ]*")
+         link = link:gsub("_", "[_ ]*")
+         return link
+      end,
+   },
+},
+```
+
+### formatter
+
+#### heading_link
+
+##### Sample code 1 - heading_link
+
+Sample `heading_link` formatter (Treat '-' and '_' as any symbol character)
+```lua
+heading_link = function(link)
+   local symbols = '[' .. [[ ,.<>/?!;:(){}\[\]@#$%^&*+_="'\\|%%-]] .. ']'
+   link = link:gsub('[-_]', symbols .. '*')
+   link = link .. symbols .. '*$' -- it may have symbol at the end
+   return link
+end,
+```
+
+##### Sample code 2 - heading_link
+
+Replace 'and' -> 'and' or '&'
+Replace 'at'  -> 'at'  or '@'
 
 ```lua
-vim.keymap.set('n', '<bs>', ':edit #<cr>', { silent = true })
+heading_link = function(link)
+   local symbols = '[' .. [[ ,.<>/?!;:(){}\[\]@#$%^&*+_="'\\|%%-]] .. ']'
+   link = link:gsub('[-_]', symbols .. '*')
+   link = link:gsub("and", "\\(&\\|and\\)") -- 'and' --> '&' or 'and'
+   link = link:gsub("at", "\\(@\\|at\\)") -- 'at' --> '@' or 'at'
+   link = link .. symbols .. '*$' -- it may have symbol at the end
+   return link
+end,
+
 ```
+
+### keys
+
+```lua
+keys = {
+   { '<cr>', '<cmd>FollowMdLinks<cr>', desc = 'Follow markdown link', ft = 'markdown' },
+   { '<bs', ':edit #<cr>', desc = 'Back to the previous file', ft = 'markdown'},
+},
+```
+
+## Usage
+
+With your cursor on link and...
+
+Command:
+```vim
+:FollowMdLinks
+```
+Lua:
+```lua
+require('follow-md-links').follow_link()
+```
+
+
+
