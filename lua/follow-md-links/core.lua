@@ -84,22 +84,25 @@ end
 
 local function resolve_link(link)
 	local link_type
-	if link:sub(1, 1) == [[/]] then
-		link_type = "local"
-		return link, link_type
+   local heading
+	if link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
+		link_type = "web"
+		return link, link_type, nil
 	elseif link:sub(1, 1) == [[#]] then
 		link_type = "heading"
-		return link:sub(2), link_type
+      return link:sub(2), link_type, link:sub(2)
+   elseif link:sub(1, 1) == [[/]] then
+		link_type = "local"
 	elseif link:sub(1, 1) == [[~]] then
 		link_type = "local"
-		return os.getenv("HOME") .. [[/]] .. link:sub(2), link_type
-	elseif link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
-		link_type = "web"
-		return link, link_type
+		link = os.getenv("HOME") .. [[/]] .. link:sub(2)
 	else
 		link_type = "local"
-		return fn.expand("%:p:h") .. [[/]] .. link, link_type
+		link = fn.expand("%:p:h") .. [[/]] .. link
 	end
+   heading = link:match("#(.+)")
+   link = link:match("^([^#]+)")
+   return link, link_type, heading
 end
 
 local function follow_local_link(link)
@@ -135,9 +138,9 @@ local function follow_local_link(link)
 end
 
 local function follow_heading_link(link)
-	link = link:gsub("-", "[- ]*")
-	link = link:gsub("_", "[_ ]*")
-	vim.fn.search("\\c^#\\+ *" .. link, 'ew')
+   local opts = require("follow-md-links.options").get()
+   local pattern = opts.formatter.heading_link(link)
+   vim.fn.search('\\c^#\\+\\s*' .. pattern, 'ew')
 end
 
 local M = {}
@@ -146,9 +149,10 @@ function M.follow_link()
 	local link_destination = get_link_destination()
 
 	if link_destination then
-		local resolved_link, link_type = resolve_link(link_destination)
+		local resolved_link, link_type, heading = resolve_link(link_destination)
 		if link_type == "local" then
 			follow_local_link(resolved_link)
+         if heading then follow_heading_link(heading) end
 		elseif link_type == "heading" then
 			follow_heading_link(resolved_link)
 		elseif link_type == "web" then
