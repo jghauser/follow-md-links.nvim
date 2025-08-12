@@ -150,6 +150,8 @@ function M.follow_link()
 		if link_type == "local" then
 			follow_local_link(resolved_link)
 		elseif link_type == "heading" then
+			-- Save link position to jumplist
+			cmd("normal! m'")
 			follow_heading_link(resolved_link)
 		elseif link_type == "web" then
 			if is_linux then
