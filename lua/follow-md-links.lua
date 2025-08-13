@@ -29,7 +29,16 @@ local function get_reference_link_destination(link_label)
   ]])
 	-- Problem with handling whitespace in filenames elegently is with this iter_matches
 	for _, captures, _ in parsed_query:iter_matches(root, 0) do
-		local node_text = treesitter.get_node_text(captures[2], 0)
+		-- Prior to Neovim 0.11, `match` in `Query:iter_matches()` referred to a single match
+		-- https://github.com/neovim/neovim/commit/bd5008de07d29a6457ddc7fe13f9f85c9c4619d2
+		local match
+		if vim.fn.has('nvim-0.10') == 0 then
+			match = captures[2]
+		else
+			assert(#captures[2] == 1)
+			match = captures[2][1]
+		end
+		local node_text = treesitter.get_node_text(match, 0)
 		-- Kludgy method right now is to require that filenames with spaces are wrapped in <>,
 		-- which are stripped out after the matching is complete
 		return string.gsub(node_text, "[<>]", "")
