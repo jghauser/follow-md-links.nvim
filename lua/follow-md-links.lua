@@ -226,11 +226,11 @@ function M.follow_link()
       vim.cmd.Man(link_destination:gsub("man://", ""))
     elseif link_type == "web" then
       if is_linux then
-        vim.fn.system("xdg-open " .. vim.fn.shellescape(resolved_link))
+        vim.system({ "xdg-open", resolved_link })
       elseif is_macos then
-        vim.fn.system("open " .. vim.fn.shellescape(resolved_link))
+        vim.system({ "open", resolved_link })
       elseif is_windows then
-        vim.fn.system('cmd.exe /c start "" ' .. vim.fn.shellescape(resolved_link))
+        vim.system({ "cmd.exe", "/c", "start", "", resolved_link })
       end
     end
   end
