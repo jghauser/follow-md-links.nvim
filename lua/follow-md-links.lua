@@ -4,19 +4,15 @@
 
 local fn = vim.fn
 local cmd = vim.cmd
-local loop = vim.loop
 local ts_utils = require("nvim-treesitter.ts_utils")
 local query = require("vim.treesitter.query")
 local treesitter = require("vim.treesitter")
 
-function string:startswith(start)
-  return self:sub(1, #start) == start
-end
+local sysname = vim.uv.os_uname().sysname
 
-local os_name = loop.os_uname().sysname
-local is_windows = os_name:startswith("Windows")
-local is_macos = os_name == "Darwin"
-local is_linux = os_name == "Linux"
+local is_windows = sysname == "Windows_NT"
+local is_macos = sysname == "Darwin"
+local is_linux = sysname == "Linux"
 
 local function get_reference_link_destination(link_label)
   local language_tree = vim.treesitter.get_parser(0)
