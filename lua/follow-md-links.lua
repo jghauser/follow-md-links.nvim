@@ -4,31 +4,29 @@
 
 local fn = vim.fn
 local cmd = vim.cmd
-local loop = vim.loop
-local ts_utils = require("nvim-treesitter.ts_utils")
-local query = require("vim.treesitter.query")
 local treesitter = require("vim.treesitter")
 
-function string:startswith(start)
-  return self:sub(1, #start) == start
-end
+local sysname = vim.uv.os_uname().sysname
 
-local os_name = loop.os_uname().sysname
-local is_windows = os_name:startswith("Windows")
-local is_macos = os_name == "Darwin"
-local is_linux = os_name == "Linux"
+local is_windows = sysname == "Windows_NT"
+local is_macos = sysname == "Darwin"
+local is_linux = sysname == "Linux"
+
+local block_parser
+local block_tree
+local block_root
+local inline_parser
+local inline_tree
+local inline_root
 
 local function get_reference_link_destination(link_label)
-  local language_tree = vim.treesitter.get_parser(0)
-  local syntax_tree = language_tree:parse()
-  local root = syntax_tree[1]:root()
   local parsed_query = vim.treesitter.query.parse("markdown", [[
   (link_reference_definition
     (link_label) @label (#eq? @label "]] .. link_label .. [[")
     (link_destination) @link_destination)
   ]])
   -- Problem with handling whitespace in filenames elegently is with this iter_matches
-  for _, captures, _ in parsed_query:iter_matches(root, 0) do
+  for _, captures, _ in parsed_query:iter_matches(block_root, 0) do
     -- Prior to Neovim 0.11, `match` in `Query:iter_matches()` referred to a single match
     -- https://github.com/neovim/neovim/commit/bd5008de07d29a6457ddc7fe13f9f85c9c4619d2
     local match
@@ -42,49 +40,108 @@ local function get_reference_link_destination(link_label)
     -- Kludgy method right now is to require that filenames with spaces are wrapped in <>,
     -- which are stripped out after the matching is complete
     return string.gsub(node_text, "[<>]", "")
-    --return treesitter.get_node_text(captures[2], 0)
   end
 end
 
+local function get_inline_node_at_cursor(row, col)
+  -- Find the block node at the cursor
+  local block_node = block_root:named_descendant_for_range(row, col, row, col)
+  if not block_node then return nil end
+
+  -- Find the 'inline' child node
+  local inline_node = nil
+  if block_node:type() == "inline" then
+    inline_node = block_node
+  else
+    for i = 0, block_node:named_child_count() - 1 do
+      local child = block_node:named_child(i)
+      if child:type() == "inline" then
+        inline_node = child
+        break
+      end
+    end
+  end
+  if not inline_node then return nil end
+
+  -- Find the node at the cursor in the inline tree
+  local inline_cursor_node = inline_root:named_descendant_for_range(row, col, row, col)
+  return inline_cursor_node
+end
+
 local function get_link_destination()
-  local node_at_cursor = ts_utils.get_node_at_cursor()
-  local parent_node = node_at_cursor:parent()
+  block_parser = vim.treesitter.get_parser(0, "markdown")
+  inline_parser = vim.treesitter.get_parser(0, "markdown_inline")
+  if not block_parser or not inline_parser then
+    return
+  end
+  block_tree = block_parser:parse()[1]
+  block_root = block_tree:root()
+  inline_tree = inline_parser:parse()[1]
+  inline_root = inline_tree:root()
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local row = cursor[1] - 1
+  local col = cursor[2]
+
+  local node_at_cursor = get_inline_node_at_cursor(row, col)
+  if not node_at_cursor then
+    return
+  end
+
+  local parent_node = node_at_cursor and node_at_cursor:parent()
   if not (node_at_cursor and parent_node) then
     return
   elseif node_at_cursor:type() == "link_destination" then
-    return vim.split(treesitter.get_node_text(node_at_cursor, 0), "\n")[1]
+    return vim.split(treesitter.get_node_text(node_at_cursor, bufnr), "\n")[1]
   elseif node_at_cursor:type() == "shortcut_link" then
-    local link_text = vim.split(treesitter.get_node_text(node_at_cursor, 0), "\n")[1]
+    local link_text = vim.split(treesitter.get_node_text(node_at_cursor, bufnr), "\n")[1]
     return get_reference_link_destination(link_text)
   elseif node_at_cursor:type() == "link_text" then
     if node_at_cursor:parent():type() == "shortcut_link" then
-      local link_text = vim.split(treesitter.get_node_text(node_at_cursor:parent(), 0), "\n")[1]
+      local link_text = vim.split(treesitter.get_node_text(node_at_cursor:parent(), bufnr), "\n")[1]
       return get_reference_link_destination(link_text)
     end
-    local next_node = ts_utils.get_next_node(node_at_cursor)
-    if next_node:type() == "link_destination" then
-      return vim.split(treesitter.get_node_text(next_node, 0), "\n")[1]
-    elseif next_node:type() == "link_label" then
-      local link_label = vim.split(treesitter.get_node_text(next_node, 0), "\n")[1]
+    local parent = node_at_cursor:parent()
+    local next_node = nil
+    if parent then
+      local named_count = parent:named_child_count()
+      for i = 0, named_count - 2 do
+        if parent:named_child(i) == node_at_cursor then
+          next_node = parent:named_child(i + 1)
+          break
+        end
+      end
+    end
+    if next_node and next_node:type() == "link_destination" then
+      return vim.split(treesitter.get_node_text(next_node, bufnr), "\n")[1]
+    elseif next_node and next_node:type() == "link_label" then
+      local link_label = vim.split(treesitter.get_node_text(next_node, bufnr), "\n")[1]
       return get_reference_link_destination(link_label)
     end
   elseif node_at_cursor:type() == "link_reference_definition" or node_at_cursor:type() == "inline_link" then
-    local child_nodes = ts_utils.get_named_children(node_at_cursor)
+    local child_nodes = {}
+    for i = 0, node_at_cursor:named_child_count() - 1 do
+      table.insert(child_nodes, node_at_cursor:named_child(i))
+    end
     for _, node in pairs(child_nodes) do
       if node:type() == "link_destination" then
-        return vim.split(treesitter.get_node_text(node, 0), "\n")[1]
+        return vim.split(treesitter.get_node_text(node, bufnr), "\n")[1]
       end
     end
   elseif node_at_cursor:type() == "full_reference_link" then
-    local child_nodes = ts_utils.get_named_children(node_at_cursor)
+    local child_nodes = {}
+    for i = 0, node_at_cursor:named_child_count() - 1 do
+      table.insert(child_nodes, node_at_cursor:named_child(i))
+    end
     for _, node in pairs(child_nodes) do
       if node:type() == "link_label" then
-        local link_label = vim.split(treesitter.get_node_text(node, 0), "\n")[1]
+        local link_label = vim.split(treesitter.get_node_text(node, bufnr), "\n")[1]
         return get_reference_link_destination(link_label)
       end
     end
   elseif node_at_cursor:type() == "link_label" then
-    local link_label = vim.split(treesitter.get_node_text(node_at_cursor, 0), "\n")[1]
+    local link_label = vim.split(treesitter.get_node_text(node_at_cursor, bufnr), "\n")[1]
     return get_reference_link_destination(link_label)
   else
     return
