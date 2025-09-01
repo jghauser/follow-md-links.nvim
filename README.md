@@ -11,6 +11,7 @@ This neovim plugin allows you to follow markdown links by pressing enter when th
 - web links (e.g. `[wikipedia](https://wikipedia.org)`)
 - heading links (e.g. `[chapter 1](#-chapter-1)`
 - man page links (e.g. `[printf library](man://printf(3))`)
+- uri links (e.g. `<https://example.org>`)
 
 Local files are opened in neovim and web links are opened with the default browser. Web links need to start with `https://` or `http://` to be identified properly.
 

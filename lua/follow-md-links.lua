@@ -143,6 +143,9 @@ local function get_link_destination()
   elseif node_at_cursor:type() == "link_label" then
     local link_label = vim.split(treesitter.get_node_text(node_at_cursor, bufnr), "\n")[1]
     return get_reference_link_destination(link_label)
+	elseif node_at_cursor:type() == "uri_autolink" then
+		local link_label = vim.split(treesitter.get_node_text(node_at_cursor, 0), "\n")[1]
+		return string.gsub(link_label, "^<(.-)>$", "%1")
   else
     return
   end
