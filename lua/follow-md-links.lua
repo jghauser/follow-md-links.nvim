@@ -162,6 +162,9 @@ local function resolve_link(link)
   elseif link:sub(1, 1) == [[~]] then
     link_type = "local"
     return os.getenv("HOME") .. [[/]] .. link:sub(2), link_type
+  elseif link:sub(1, 7) == [[file://]] then
+    link_type = "open_local"
+    return (resolve_link(link:sub(8))), link_type
   elseif link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
     link_type = "web"
     return link, link_type
@@ -227,7 +230,7 @@ function M.follow_link()
       follow_heading_link(resolved_link)
     elseif link_type == "man" then
       vim.cmd.Man(link_destination:gsub("man://", ""))
-    elseif link_type == "web" then
+    elseif link_type == "web" or link_type == "open_local" then
       if is_linux then
         vim.system({ "xdg-open", resolved_link })
       elseif is_macos then
