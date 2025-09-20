@@ -174,7 +174,7 @@ local function resolve_link(link)
   end
 end
 
-local function follow_local_link(link)
+local function follow_local_link(link, directory_index)
   local modified_link = nil
   local path_and_line_number = vim.split(link, ":")
   local path = path_and_line_number[1]
@@ -188,6 +188,7 @@ local function follow_local_link(link)
     if vim.fn.glob(path) == "" then
       cmd(string.format("%s %s %s", "!mkdir", "-p", fn.fnameescape(path)))
     end
+    path = path .. directory_index
   end
 
   -- attempt to add an extension and open
@@ -213,6 +214,9 @@ local function follow_heading_link(link)
 end
 
 local M = {}
+M._config = {
+  directory_index = "",
+}
 
 function M.follow_link()
   local link_destination = get_link_destination()
@@ -220,7 +224,7 @@ function M.follow_link()
   if link_destination then
     local resolved_link, link_type = resolve_link(link_destination)
     if link_type == "local" then
-      follow_local_link(resolved_link)
+      follow_local_link(resolved_link, M._config.directory_index)
     elseif link_type == "heading" then
       -- Save link position to jumplist
       cmd("normal! m'")
@@ -239,4 +243,7 @@ function M.follow_link()
   end
 end
 
+function M.setup(config)
+  M._config = config or {}
+end
 return M

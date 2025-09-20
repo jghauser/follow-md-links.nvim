@@ -37,6 +37,12 @@ Lazy.nvim:
 
 ## Configuration
 
+By default when link points to directory it is opened in neovim using netrw. You can set a index file location using `directory_index` in config.
+```lua
+require("follow-md-links").setup({directory_index = "/index.md"})
+```
+
+
 The plugin maps `<cr>` in normal mode to open links in markdown files. You might also want to add the following keymap to easily go back to the previous file with backspace:
 
 ```lua
