@@ -114,7 +114,7 @@ end,
 ```lua
 keys = {
    { '<cr>', '<cmd>FollowMdLinks<cr>', desc = 'Follow markdown link', ft = 'markdown' },
-   { '<bs', ':edit #<cr>', desc = 'Back to the previous file', ft = 'markdown'},
+   { '<bs>', ':edit #<cr>', desc = 'Back to the previous file', ft = 'markdown'},
 },
 ```
 
