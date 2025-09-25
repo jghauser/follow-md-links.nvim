@@ -87,12 +87,12 @@ end
 
 local function resolve_link(link)
    local link_type
-   local heading
+   local anchor
    if link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
       link_type = "web"
       return link, link_type, nil
    elseif link:sub(1, 1) == [[#]] then
-      link_type = "heading"
+      link_type = "anchor"
       return link:sub(2), link_type, link:sub(2)
    elseif link:sub(1, 1) == [[/]] then
       link_type = "local"
@@ -103,9 +103,9 @@ local function resolve_link(link)
       link_type = "local"
       link = fn.expand("%:p:h") .. [[/]] .. link
    end
-   heading = link:match("#(.+)")
+   anchor = link:match("#(.+)")
    link = link:match("^([^#]+)")
-   return link, link_type, heading
+   return link, link_type, anchor
 end
 
 local function follow_local_link(link)
@@ -140,7 +140,7 @@ local function follow_local_link(link)
    end
 end
 
-local function follow_heading_link(link)
+local function follow_anchor_link(link)
    link = link:gsub("-", "[- ]*")
    link = link:gsub("_", "[_ ]*")
    vim.fn.search("\\c^#\\+ *" .. link, "ew")
@@ -152,14 +152,14 @@ function M.follow_link()
    local link_destination = get_link_destination()
 
    if link_destination then
-      local resolved_link, link_type, heading = resolve_link(link_destination)
+      local resolved_link, link_type, anchor = resolve_link(link_destination)
       if link_type == "local" then
          follow_local_link(resolved_link)
-         if heading then
-            follow_heading_link(heading)
+         if anchor then
+            follow_anchor_link(anchor)
          end
-      elseif link_type == "heading" then
-         follow_heading_link(resolved_link)
+      elseif link_type == "anchor" then
+         follow_anchor_link(resolved_link)
       elseif link_type == "web" then
          if is_linux then
             vim.fn.system("xdg-open " .. vim.fn.shellescape(resolved_link))
