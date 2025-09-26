@@ -153,28 +153,33 @@ end
 
 local function resolve_link(link)
   local link_type
-  if link:sub(1, 1) == [[/]] then
-    link_type = "local"
-    return link, link_type
-  elseif link:sub(1, 1) == [[#]] then
-    link_type = "heading"
-    return link:sub(2), link_type
-  elseif link:sub(1, 1) == [[~]] then
-    link_type = "local"
-    return os.getenv("HOME") .. [[/]] .. link:sub(2), link_type
-  elseif link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
+
+  if link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
     link_type = "web"
     return link, link_type
   elseif link:sub(1, 6) == [[man://]] then
     link_type = "man"
     return link, link_type
-  else
-    link_type = "local"
-    return fn.expand("%:p:h") .. [[/]] .. link, link_type
+  elseif link:sub(1, 1) == [[#]] then
+    link_type = "heading"
+    return nil, link_type, link:sub(2)
   end
+
+  -- local
+  if link:sub(1, 1) == [[/]] then
+    link = link
+  elseif link:sub(1, 1) == [[~]] then
+    link = os.getenv("HOME") .. [[/]] .. link:sub(2)
+  else
+    link = fn.expand("%:p:h") .. [[/]] .. link
+  end
+  link_type = "local"
+  return link:match("^([^#]+)"), link_type, link:match("#(.+)")
 end
 
 local function follow_local_link(link)
+  if not link then return end
+
   local modified_link = nil
   local path_and_line_number = vim.split(link, ":")
   local path = path_and_line_number[1]
@@ -218,13 +223,16 @@ function M.follow_link()
   local link_destination = get_link_destination()
 
   if link_destination then
-    local resolved_link, link_type = resolve_link(link_destination)
+    local resolved_link, link_type, heading = resolve_link(link_destination)
     if link_type == "local" then
       follow_local_link(resolved_link)
+      if heading then
+        follow_heading_link(heading)
+      end
     elseif link_type == "heading" then
       -- Save link position to jumplist
       cmd("normal! m'")
-      follow_heading_link(resolved_link)
+      follow_heading_link(heading)
     elseif link_type == "man" then
       vim.cmd.Man(link_destination:gsub("man://", ""))
     elseif link_type == "web" then
