@@ -209,7 +209,7 @@ end
 local function follow_heading_link(link)
   link = link:gsub("-", "[- ]*")
   link = link:gsub("_", "[_ ]*")
-  vim.fn.search("\\c^#\\+ *" .. link, 'ew')
+  vim.fn.search("\\c^#\\+ *" .. link, 'w')
 end
 
 local M = {}
