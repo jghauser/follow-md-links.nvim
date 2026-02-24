@@ -153,24 +153,26 @@ end
 
 local function resolve_link(link)
   local link_type
-  if link:sub(1, 1) == [[/]] then
-    link_type = "local"
-    return link, link_type
-  elseif link:sub(1, 1) == [[#]] then
-    link_type = "heading"
-    return link:sub(2), link_type
-  elseif link:sub(1, 1) == [[~]] then
-    link_type = "local"
-    return os.getenv("HOME") .. [[/]] .. link:sub(2), link_type
-  elseif link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
+
+  if link:sub(1, 8) == [[https://]] or link:sub(1, 7) == [[http://]] then
     link_type = "web"
     return link, link_type
   elseif link:sub(1, 6) == [[man://]] then
     link_type = "man"
     return link, link_type
+  elseif link:sub(1, 1) == [[#]] then
+    link_type = "heading"
+    return link:sub(2), link:sub(2)
   else
     link_type = "local"
-    return fn.expand("%:p:h") .. [[/]] .. link, link_type
+    if link:sub(1, 1) == [[/]] then
+      link = link
+    elseif link:sub(1, 1) == [[~]] then
+      link = os.getenv("HOME") .. [[/]] .. link:sub(2)
+    else
+      link = fn.expand("%:p:h") .. [[/]] .. link
+    end
+    return link, link_type
   end
 end
 
@@ -220,7 +222,12 @@ function M.follow_link()
   if link_destination then
     local resolved_link, link_type = resolve_link(link_destination)
     if link_type == "local" then
+      local heading = resolved_link:match("#(.+)")
+      resolved_link = resolved_link:match("^([^#]+)")
       follow_local_link(resolved_link)
+      if heading then
+        follow_heading_link(heading)
+      end
     elseif link_type == "heading" then
       -- Save link position to jumplist
       cmd("normal! m'")
