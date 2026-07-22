@@ -43,3 +43,16 @@ The plugin maps `<cr>` in normal mode to open links in markdown files. You might
 ```lua
 vim.keymap.set('n', '<bs>', ':edit #<cr>', { silent = true })
 ```
+
+You can add your own link resolution logic:
+
+```lua
+require('follow-md-links').handler = function(link_destination)
+  if string.match(link_destination, <pattern>) then
+    -- add your custom logic here
+
+    -- upon success return true to skip the default link resolution logic
+    return true
+  end
+end
+```
