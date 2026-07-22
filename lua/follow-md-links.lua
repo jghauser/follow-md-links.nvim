@@ -215,11 +215,12 @@ local function follow_heading_link(link)
 end
 
 local M = {}
+M.handler = function(_) return false end
 
 function M.follow_link()
   local link_destination = get_link_destination()
 
-  if link_destination then
+  if link_destination and not M.handler(link_destination) then
     local resolved_link, link_type = resolve_link(link_destination)
     if link_type == "local" then
       local heading = resolved_link:match("#(.+)")
