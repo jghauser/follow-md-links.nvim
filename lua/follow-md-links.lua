@@ -61,7 +61,7 @@ local function get_inline_node_at_cursor(row, col)
       end
     end
   end
-  if not inline_node then return nil end
+  if not inline_node and block_node:type() ~= "pipe_table_cell" then return nil end
 
   -- Find the node at the cursor in the inline tree
   local inline_cursor_node = inline_root:named_descendant_for_range(row, col, row, col)
